@@ -5,9 +5,14 @@ import test from "node:test";
 const output = new URL("../out/index.html", import.meta.url);
 const arcadeOutput = new URL("../out/arcade.html", import.meta.url);
 const dispatchOutput = new URL("../out/games/2-17-am.html", import.meta.url);
+const breakOutput = new URL("../out/games/break-the-app.html", import.meta.url);
+const alibiOutput = new URL("../out/games/alibi-file.html", import.meta.url);
+const ceoOutput = new URL("../out/games/sixty-second-ceo.html", import.meta.url);
+const signalOutput = new URL("../out/games/signal-lost.html", import.meta.url);
+const roomOutput = new URL("../out/games/room-404.html", import.meta.url);
 
-test("exports a complete game landing page", async () => {
-  const html = await readFile(output, "utf8");
+test("exports the original Break the App game on its permanent route", async () => {
+  const html = await readFile(breakOutput, "utf8");
   assert.match(html, /<title>Break the App — Find the loophole<\/title>/i);
   assert.match(html, /Break the App/i);
   assert.match(html, /How to play/i);
@@ -30,7 +35,19 @@ test("exports the Fairbyte Arcade catalog", async () => {
   assert.match(html, /2:17 AM/i);
   assert.match(html, /Break the App/i);
   assert.match(html, /100 GAME PROJECT/i);
-  assert.match(html, /\/games\/2-17-am\//i);
+  assert.match(html, /\/games\/2-17-am/i);
+  assert.match(html, /\/games\/alibi-file/i);
+  assert.match(html, /\/games\/sixty-second-ceo/i);
+  assert.match(html, /\/games\/signal-lost/i);
+  assert.match(html, /\/games\/room-404/i);
+  assert.match(html, /06.*PLAYABLE GAMES/is);
+});
+
+test("serves the arcade catalog at the root domain", async () => {
+  const html = await readFile(output, "utf8");
+  assert.match(html, /Choose your next game/i);
+  assert.match(html, /New worlds, no reskins/i);
+  assert.match(html, /Search the catalog/i);
 });
 
 test("exports the complete 2:17 AM game route", async () => {
@@ -39,4 +56,32 @@ test("exports the complete 2:17 AM game route", async () => {
   assert.match(html, /Four response units/i);
   assert.match(html, /Fictional emergency-management strategy game/i);
   assert.match(html, /arcade\/2-17-am-cover\.jpg/i);
+});
+
+test("exports Alibi File as a complete deduction game", async () => {
+  const html = await readFile(alibiOutput, "utf8");
+  assert.match(html, /OPEN THE FIRST FILE/i);
+  assert.match(html, /Every story works/i);
+  assert.match(html, /alibi-file-cover\.jpg/i);
+});
+
+test("exports Sixty-Second CEO as a complete strategy game", async () => {
+  const html = await readFile(ceoOutput, "utf8");
+  assert.match(html, /TAKE THE CORNER OFFICE/i);
+  assert.match(html, /Ten decisions/i);
+  assert.match(html, /sixty-second-ceo-cover\.jpg/i);
+});
+
+test("exports Signal Lost as a complete audio mystery", async () => {
+  const html = await readFile(signalOutput, "utf8");
+  assert.match(html, /POWER THE RECEIVER/i);
+  assert.match(html, /Five carriers/i);
+  assert.match(html, /signal-lost-cover\.jpg/i);
+});
+
+test("exports Room 404 as a complete desktop escape game", async () => {
+  const html = await readFile(roomOutput, "utf8");
+  assert.match(html, /RESTORE GUEST SESSION/i);
+  assert.match(html, /abandoned computer/i);
+  assert.match(html, /room-404-cover\.jpg/i);
 });

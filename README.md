@@ -6,9 +6,13 @@ The game includes a synthesized cyber-interface soundscape for controls, hints, 
 
 ## Fairbyte Arcade routes
 
-- `/` — Break the App
-- `/arcade/` — the growing Fairbyte Arcade catalog
+- `/` and `/arcade/` — the Fairbyte Arcade catalog and 100 Game Project hub
+- `/games/break-the-app/` — Break the App, the original four-case interface puzzle
 - `/games/2-17-am/` — 2:17 AM, a turn-based emergency-dispatch strategy game
+- `/games/alibi-file/` — Alibi File, a three-case deduction game
+- `/games/sixty-second-ceo/` — Sixty-Second CEO, a one-minute business strategy game
+- `/games/signal-lost/` — Signal Lost, an audio-tuning mystery
+- `/games/room-404/` — Room 404, a fake-desktop escape game
 
 ## How to play
 

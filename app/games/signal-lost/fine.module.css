@@ -1,0 +1,28 @@
+.fineTune {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto auto;
+  align-items: center;
+  gap: 7px;
+  margin-top: 15px;
+}
+
+.fineTune span {
+  text-align: center;
+  color: #737e6d;
+  font-size: 7px;
+  letter-spacing: 0.13em;
+}
+
+.fineTune button {
+  border: 1px solid #465440;
+  background: #0d120e;
+  color: #b3ca9f;
+  padding: 8px 9px;
+  font: bold 8px "Courier New", monospace;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .fineTune { gap: 4px; }
+  .fineTune button { padding: 8px 6px; }
+}
