@@ -4,6 +4,12 @@ A four-case browser puzzle game from Fairbyte Labs. Players find loopholes in or
 
 The game includes a synthesized cyber-interface soundscape for controls, hints, rejected attempts, case clears, and campaign completion. Sounds require no media assets and can be muted from the header; the preference is remembered locally.
 
+## Fairbyte Arcade routes
+
+- `/` — Break the App
+- `/arcade/` — the growing Fairbyte Arcade catalog
+- `/games/2-17-am/` — 2:17 AM, a turn-based emergency-dispatch strategy game
+
 ## How to play
 
 1. Read the mission for the current case.
