@@ -15,6 +15,7 @@ const courierOutput = new URL("../out/games/star-courier.html", import.meta.url)
 const paddleOutput = new URL("../out/games/pulse-paddle.html", import.meta.url);
 const circuitOutput = new URL("../out/games/circuit-eater.html", import.meta.url);
 const coilOutput = new URL("../out/games/coilfield.html", import.meta.url);
+const depthOutputs = ["black-box-daily","salvage-vector","lumenhold","twofold-arena","ash-and-ink","faultline-pinball","while-you-slept"].map(slug=>new URL(`../out/games/${slug}.html`, import.meta.url));
 
 test("exports the original Break the App game on its permanent route", async () => {
   const html = await readFile(breakOutput, "utf8");
@@ -45,7 +46,9 @@ test("exports the Fairbyte Arcade catalog", async () => {
   assert.match(html, /\/games\/sixty-second-ceo/i);
   assert.match(html, /\/games\/signal-lost/i);
   assert.match(html, /\/games\/room-404/i);
-  assert.match(html, /11.*PLAYABLE GAMES/is);
+  assert.match(html, /18.*PLAYABLE GAMES/is);
+  assert.match(html, /TODAY(?:'|&#x27;)S DAILY BYTE/i);
+  assert.match(html, /Seven games built to keep/i);
   assert.match(html, /Classics, rebuilt our way/i);
   assert.match(html, /games\/sector-drop/i);
   assert.match(html, /games\/star-courier/i);
@@ -57,8 +60,22 @@ test("exports the Fairbyte Arcade catalog", async () => {
 test("serves the arcade catalog at the root domain", async () => {
   const html = await readFile(output, "utf8");
   assert.match(html, /Choose your next game/i);
-  assert.match(html, /New worlds, no reskins/i);
+  assert.match(html, /Seven games built to keep/i);
   assert.match(html, /Search the catalog/i);
+});
+
+test("exports all seven depth-drop games with real play systems", async () => {
+  const pages=await Promise.all(depthOutputs.map(file=>readFile(file,"utf8")));
+  const checks=[
+    [/Black Box Daily/i,/SIX PROBES|six probes/i,/UNLIMITED PRACTICE/i],
+    [/Salvage Vector/i,/five hostile sectors/i,/LAUNCH RUN/i],
+    [/Lumenhold/i,/twelve escalating waves/i,/LIGHT THE BEACONS/i],
+    [/Twofold Arena/i,/LOCAL 2P/i,/ENTER ARENA/i],
+    [/Ash &amp; Ink|Ash & Ink/i,/nine encounters/i,/OPEN THE TOME/i],
+    [/Faultline Pinball/i,/quake-powered multiball/i,/LAUNCH BALL/i],
+    [/While You Slept/i,/production continues/i,/Build the town/i],
+  ];
+  pages.forEach((html,index)=>checks[index].forEach(pattern=>assert.match(html,pattern)));
 });
 
 test("exports the complete 2:17 AM game route", async () => {
