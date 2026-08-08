@@ -161,6 +161,54 @@ input:disabled {
   border-left: 1px solid var(--line);
 }
 
+.sound-toggle {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid #34454d;
+  border-radius: 5px;
+  background: rgba(123, 231, 255, 0.035);
+  color: var(--cyan);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  transition: 160ms ease;
+}
+
+.sound-toggle:hover {
+  border-color: var(--cyan-dim);
+  background: rgba(123, 231, 255, 0.08);
+}
+
+.sound-toggle.muted {
+  color: var(--muted-2);
+  background: transparent;
+}
+
+.sound-toggle svg {
+  width: 15px;
+  height: 15px;
+  overflow: visible;
+}
+
+.sound-toggle svg path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sound-toggle svg path:first-child {
+  fill: currentColor;
+  stroke: none;
+}
+
 .pulse-dot {
   width: 8px;
   height: 8px;
@@ -977,6 +1025,7 @@ input:disabled {
 
 .complete-grid { position: absolute; inset: 0; opacity: 0.5; background-image: linear-gradient(rgba(123,231,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(123,231,255,0.035) 1px, transparent 1px); background-size: 32px 32px; mask-image: radial-gradient(circle at center, black, transparent 72%); }
 .complete-card { width: min(760px, 100%); position: relative; text-align: center; border: 1px solid #4c6131; border-radius: 12px; padding: clamp(30px, 6vw, 68px); background: rgba(14,21,24,0.94); box-shadow: 0 35px 120px rgba(0,0,0,0.65), 0 0 80px rgba(200,255,61,0.04); }
+.complete-sound-control { position: absolute; top: 18px; right: 18px; }
 .complete-card > .brand-mark { transform: scale(1.4); margin-bottom: 24px; }
 .complete-kicker { display: block; color: var(--lime); font-family: var(--font-geist-mono), monospace; font-size: 9px; font-weight: 800; letter-spacing: 0.18em; }
 .complete-card h1 { margin: 15px 0; font-size: clamp(40px, 7vw, 72px); line-height: 0.98; letter-spacing: -0.06em; }
@@ -1007,6 +1056,8 @@ input:disabled {
   .topbar { padding: 0 18px; }
   .fairbyte-lockup span { display: none; }
   .case-status .solved-count { display: none; }
+  .case-status .sound-toggle span { display: none; }
+  .case-status .sound-toggle { width: 32px; padding: 0; }
   .level-rail { overflow-x: auto; }
   .rail-label { display: none; }
   .level-buttons { min-width: 690px; }
@@ -1031,6 +1082,7 @@ input:disabled {
   .game-title { font-size: 18px; justify-self: center; }
   .game-title em { margin: 0 5px; }
   .case-status { font-size: 8px; }
+  .case-status { gap: 10px; }
   .level-rail { min-height: 57px; padding: 7px 10px; }
   .level-buttons { min-width: 610px; }
   .level-button { padding: 6px 9px; }
@@ -1094,6 +1146,9 @@ input:disabled {
   .complete-score { grid-template-columns: 1fr; }
   .complete-score > div { padding: 12px 0; }
   .complete-score > div + div { border-left: 0; border-top: 1px solid var(--line); }
+  .complete-sound-control { top: 12px; right: 12px; }
+  .complete-sound-control .sound-toggle span { display: none; }
+  .complete-sound-control .sound-toggle { width: 32px; padding: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

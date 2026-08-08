@@ -10,6 +10,8 @@ test("exports a complete game landing page", async () => {
   assert.match(html, /Break the App/i);
   assert.match(html, /How to play/i);
   assert.match(html, /Cart Collapse/i);
+  assert.match(html, /Mute game sounds/i);
+  assert.match(html, /SOUND ON/i);
   assert.doesNotMatch(html, /Starter Project|Building your site|react-loading-skeleton/i);
 });
 

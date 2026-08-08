@@ -2,6 +2,8 @@
 
 A four-case browser puzzle game from Fairbyte Labs. Players find loopholes in ordinary interfaces—no developer tools or outside scripts required.
 
+The game includes a synthesized cyber-interface soundscape for controls, hints, rejected attempts, case clears, and campaign completion. Sounds require no media assets and can be muted from the header; the preference is remembered locally.
+
 ## How to play
 
 1. Read the mission for the current case.

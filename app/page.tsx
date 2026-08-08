@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { type GameSound, useGameAudio } from "./useGameAudio";
 
 type LogEntry = {
   id: number;
@@ -107,6 +108,32 @@ function TinyIcon({ children }: { children: React.ReactNode }) {
   return <span className="tiny-icon" aria-hidden="true">{children}</span>;
 }
 
+function SoundToggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      className={`sound-toggle ${enabled ? "" : "muted"}`}
+      onClick={onToggle}
+      aria-label={enabled ? "Mute game sounds" : "Turn on game sounds"}
+      aria-pressed={!enabled}
+      title={enabled ? "Mute game sounds" : "Turn on game sounds"}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+        {enabled ? (
+          <>
+            <path d="M16 9.2a4 4 0 0 1 0 5.6" />
+            <path d="M18.7 6.8a7.2 7.2 0 0 1 0 10.4" />
+          </>
+        ) : (
+          <path d="m17 9 5 5m0-5-5 5" />
+        )}
+      </svg>
+      <span>{enabled ? "SOUND ON" : "MUTED"}</span>
+    </button>
+  );
+}
+
 type GameFrameProps = {
   level: LevelMeta;
   levelIndex: number;
@@ -119,6 +146,9 @@ type GameFrameProps = {
   onRestart: () => void;
   onAdvance: () => void;
   onShare: () => void;
+  soundEnabled: boolean;
+  onToggleSound: () => void;
+  playSound: (sound: GameSound) => void;
   children: React.ReactNode;
 };
 
@@ -134,6 +164,9 @@ function GameFrame({
   onRestart,
   onAdvance,
   onShare,
+  soundEnabled,
+  onToggleSound,
+  playSound,
   children,
 }: GameFrameProps) {
   const [hintOpen, setHintOpen] = useState(false);
@@ -157,6 +190,7 @@ function GameFrame({
           <span className="solved-count">
             <span className="pulse-dot" /> {completed.length}/{LEVELS.length} SOLVED
           </span>
+          <SoundToggle enabled={soundEnabled} onToggle={onToggleSound} />
         </div>
       </header>
 
@@ -174,7 +208,10 @@ function GameFrame({
                   isCompleted ? "complete" : ""
                 }`}
                 disabled={isLocked}
-                onClick={() => onSelectLevel(index)}
+                onClick={() => {
+                  playSound("navigate");
+                  onSelectLevel(index);
+                }}
                 aria-current={index === levelIndex ? "step" : undefined}
                 aria-label={`${isLocked ? "Locked: " : ""}Case ${item.number}, ${item.title}`}
               >
@@ -213,7 +250,7 @@ function GameFrame({
             </div>
           </div>
 
-          <details className="how-to-play">
+          <details className="how-to-play" onToggle={(event) => event.currentTarget.open && playSound("tap")}>
             <summary><span>How to play</span><i>+</i></summary>
             <ol>
               <li>Read the mission, then use the fake app like a normal customer.</li>
@@ -250,8 +287,8 @@ function GameFrame({
                 <p>{level.lesson}</p>
               </div>
               <div className="result-actions">
-                <button type="button" className="button ghost" onClick={onShare}>Share result</button>
-                <button type="button" className="button primary" onClick={onAdvance}>
+                <button type="button" className="button ghost" onClick={() => { playSound("tap"); onShare(); }}>Share result</button>
+                <button type="button" className="button primary" onClick={() => { playSound(levelIndex === LEVELS.length - 1 ? "complete" : "navigate"); onAdvance(); }}>
                   {levelIndex === LEVELS.length - 1 ? "View campaign" : "Next case"}
                 </button>
               </div>
@@ -266,7 +303,7 @@ function GameFrame({
                 <h2>The app held—for now.</h2>
                 <p>Reset the case and try a different sequence.</p>
               </div>
-              <button type="button" className="button primary" onClick={onRestart}>Retry case</button>
+              <button type="button" className="button primary" onClick={() => { playSound("reset"); onRestart(); }}>Retry case</button>
             </div>
           )}
 
@@ -309,7 +346,7 @@ function GameFrame({
               <>
                 <span>{hintReady ? "HINT READY" : "HINT LOCKED"}</span>
                 <p>{hintReady ? "Reveal a nudge without exposing the full solution." : "Available after two moves."}</p>
-                <button type="button" disabled={!hintReady} onClick={() => setHintOpen(true)}>
+                <button type="button" disabled={!hintReady} onClick={() => { playSound("hint"); setHintOpen(true); }}>
                   {hintReady ? "Reveal hint" : `${Math.max(0, 2 - movesUsed)} moves to unlock`}
                 </button>
               </>
@@ -320,7 +357,7 @@ function GameFrame({
 
       <footer className="game-footer">
         <div><span className="footer-target">⊙</span> Find the loophole. The interface is the puzzle.</div>
-        <button type="button" onClick={onRestart}>↻&nbsp;&nbsp; Restart case</button>
+        <button type="button" onClick={() => { playSound("reset"); onRestart(); }}>↻&nbsp;&nbsp; Restart case</button>
       </footer>
     </main>
   );
@@ -356,6 +393,7 @@ function CartLevel({ level, onSolved, frame }: LevelProps) {
 
   const changeQuantity = (next: number) => {
     if (locked || next < 1 || next > 3 || next === quantity) return;
+    frame.playSound("tap");
     setQuantity(next);
     spendMove();
     log(`Quantity changed to ${next}`, applied ? `${applied} remained applied` : "Cart recalculated");
@@ -363,6 +401,7 @@ function CartLevel({ level, onSolved, frame }: LevelProps) {
 
   const changeShipping = (next: typeof shipping) => {
     if (locked || next === shipping) return;
+    frame.playSound("tap");
     setShipping(next);
     spendMove();
     log(
@@ -376,23 +415,27 @@ function CartLevel({ level, onSolved, frame }: LevelProps) {
     const normalized = code.trim().toUpperCase();
     spendMove();
     if (normalized === "BUNDLE50" && quantity >= 2) {
+      frame.playSound("good");
       const snapshot = subtotal * 0.5;
       setDiscount(snapshot);
       setApplied(normalized);
       setFreeShipping(false);
       log("Applied BUNDLE50", `${money(snapshot)} discount locked in`, "good");
     } else if (normalized === "WELCOME10") {
+      frame.playSound("good");
       const snapshot = subtotal * 0.1;
       setDiscount(snapshot);
       setApplied(normalized);
       setFreeShipping(false);
       log("Applied WELCOME10", `${money(snapshot)} off this cart`, "good");
     } else if (normalized === "FREESHIP") {
+      frame.playSound("good");
       setDiscount(0);
       setApplied(normalized);
       setFreeShipping(true);
       log("Applied FREESHIP", "Delivery charge removed", "good");
     } else {
+      frame.playSound("error");
       log("Promotion rejected", normalized === "BUNDLE50" ? "Requires two items" : "Unknown code", "bad");
     }
   };
@@ -401,10 +444,12 @@ function CartLevel({ level, onSolved, frame }: LevelProps) {
     if (locked) return;
     spendMove();
     if (total < 5 && quantity >= 1) {
+      frame.playSound("success");
       setSolved(true);
       log("Order accepted", `${money(total)} charged`, "good");
       onSolved(moves + 1);
     } else {
+      frame.playSound("error");
       log("Order still too expensive", `${money(total)} is above the mission target`, "bad");
     }
   };
@@ -526,6 +571,7 @@ function TimeLevel({ level, onSolved, frame }: LevelProps) {
 
   const changeZone = (next: typeof zone) => {
     if (locked || next === zone) return;
+    frame.playSound("navigate");
     setZone(next);
     setMoves((value) => value + 1);
     log(`Display changed to ${next}`, `Same appointments, ${next} clock labels`);
@@ -533,6 +579,7 @@ function TimeLevel({ level, onSolved, frame }: LevelProps) {
 
   const chooseSlot = (base: number) => {
     if (locked || isUnavailable(base)) return;
+    frame.playSound("tap");
     setSelected(base);
     setMoves((value) => value + 1);
     log(`Selected ${formatTime(displayed(base))} ${zone}`, `Converts to ${formatTime(base)} Central`);
@@ -542,10 +589,12 @@ function TimeLevel({ level, onSolved, frame }: LevelProps) {
     if (locked || selected === null) return;
     setMoves((value) => value + 1);
     if (selected === 990) {
+      frame.playSound("success");
       setSolved(true);
       log("Appointment confirmed", "Tuesday · 4:30 PM Central", "good");
       onSolved(moves + 1);
     } else {
+      frame.playSound("error");
       log("Wrong appointment time", `${formatTime(selected)} Central does not match`, "bad");
     }
   };
@@ -630,9 +679,11 @@ function RewardsLevel({ level, onSolved, frame }: LevelProps) {
     if (locked) return;
     setMoves((value) => value + 1);
     if (linked) {
+      frame.playSound("tap");
       setLinked(false);
       log("QuickBite disconnected", "Connection removed; points retained");
     } else {
+      frame.playSound("good");
       setLinked(true);
       setPoints((value) => value + 250);
       log("QuickBite connected", "+250 first-connection bonus", "good");
@@ -643,11 +694,13 @@ function RewardsLevel({ level, onSolved, frame }: LevelProps) {
     if (locked) return;
     setMoves((value) => value + 1);
     if (points >= 1000) {
+      frame.playSound("success");
       setPoints((value) => value - 1000);
       setSolved(true);
       log("VIP pass claimed", "1,000 points redeemed", "good");
       onSolved(moves + 1);
     } else {
+      frame.playSound("error");
       log("Not enough points", `${1000 - points} more required`, "bad");
     }
   };
@@ -717,6 +770,7 @@ function BaggageLevel({ level, onSolved, frame }: LevelProps) {
 
   const changeUnit = (next: typeof unit) => {
     if (locked || next === unit) return;
+    frame.playSound("navigate");
     setUnit(next);
     setMoves((value) => value + 1);
     log(`Display changed to ${next.toUpperCase()}`, approved ? "Previous scale result retained" : "Declared number unchanged");
@@ -726,6 +780,7 @@ function BaggageLevel({ level, onSolved, frame }: LevelProps) {
     if (locked) return;
     const kgValue = unit === "lb" ? displayedWeight * 0.453592 : displayedWeight;
     const passes = kgValue <= 20;
+    frame.playSound(passes ? "good" : "error");
     setApprovedKg(kgValue);
     setApproved(passes);
     setMoves((value) => value + 1);
@@ -740,12 +795,15 @@ function BaggageLevel({ level, onSolved, frame }: LevelProps) {
     if (locked) return;
     setMoves((value) => value + 1);
     if (approved && unit === "kg" && displayedWeight === 28) {
+      frame.playSound("success");
       setSolved(true);
       log("Bag checked in", "Tag NS 4821 issued for 28 kg", "good");
       onSolved(moves + 1);
     } else if (!approved) {
+      frame.playSound("error");
       log("Check-in blocked", "A passing scale result is required", "bad");
     } else {
+      frame.playSound("error");
       log("Declaration mismatch", "Final display must show 28 kg", "bad");
     }
   };
@@ -799,11 +857,24 @@ function BaggageLevel({ level, onSolved, frame }: LevelProps) {
   );
 }
 
-function CampaignComplete({ completed, onReplay }: { completed: string[]; onReplay: () => void }) {
+function CampaignComplete({
+  completed,
+  onReplay,
+  soundEnabled,
+  onToggleSound,
+}: {
+  completed: string[];
+  onReplay: () => void;
+  soundEnabled: boolean;
+  onToggleSound: () => void;
+}) {
   return (
     <main className="campaign-complete">
       <div className="complete-grid" />
       <div className="complete-card">
+        <div className="complete-sound-control">
+          <SoundToggle enabled={soundEnabled} onToggle={onToggleSound} />
+        </div>
         <BrandMark />
         <span className="complete-kicker">FAIRBYTE LABS · FIELD REPORT</span>
         <h1>You broke every app.</h1>
@@ -824,6 +895,7 @@ function CampaignComplete({ completed, onReplay }: { completed: string[]; onRepl
 }
 
 export default function Home() {
+  const audio = useGameAudio();
   const [levelIndex, setLevelIndex] = useState(0);
   const [completed, setCompleted] = useState<string[]>([]);
   const [campaignDone, setCampaignDone] = useState(false);
@@ -899,7 +971,10 @@ export default function Home() {
     return (
       <CampaignComplete
         completed={completed}
+        soundEnabled={audio.enabled}
+        onToggleSound={audio.toggle}
         onReplay={() => {
+          audio.play("navigate");
           setCampaignDone(false);
           setLevelIndex(0);
           setRunKey((value) => value + 1);
@@ -917,6 +992,9 @@ export default function Home() {
     onSelectLevel: selectLevel,
     onAdvance: advance,
     onShare: share,
+    soundEnabled: audio.enabled,
+    onToggleSound: audio.toggle,
+    playSound: audio.play,
   };
 
   const props = {
