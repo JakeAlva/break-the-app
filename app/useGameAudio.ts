@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export type GameSound =
   | "tap"
@@ -150,5 +150,5 @@ export function useGameAudio() {
     }
   }, [enabled, getContext]);
 
-  return { enabled, play, toggle };
+  return useMemo(() => ({ enabled, play, toggle }), [enabled, play, toggle]);
 }

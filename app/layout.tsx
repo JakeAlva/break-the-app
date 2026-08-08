@@ -3,21 +3,21 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://play.fairbyte.us"),
-  title: "Break the App — Find the loophole",
+  title: "Fairbyte Arcade — Original Games, Instantly Playable",
   description:
-    "Four tiny apps. Four hidden loopholes. Break the rules without breaking the interface.",
+    "A growing catalog of original browser games and re-coded arcade classics. No downloads and no accounts.",
   openGraph: {
-    title: "Break the App",
-    description: "Find the loophole. The interface is the puzzle.",
+    title: "Fairbyte Arcade",
+    description: "Eleven browser games. No downloads. Pick a world and play.",
     type: "website",
     url: "/",
-    siteName: "Fairbyte Labs",
+    siteName: "Fairbyte Arcade",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Break the App by Fairbyte Labs" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Break the App",
-    description: "Find the loophole. The interface is the puzzle.",
+    title: "Fairbyte Arcade",
+    description: "Original games and re-coded classics, instantly playable.",
     images: ["/og.png"],
   },
 };

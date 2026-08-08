@@ -10,6 +10,11 @@ const alibiOutput = new URL("../out/games/alibi-file.html", import.meta.url);
 const ceoOutput = new URL("../out/games/sixty-second-ceo.html", import.meta.url);
 const signalOutput = new URL("../out/games/signal-lost.html", import.meta.url);
 const roomOutput = new URL("../out/games/room-404.html", import.meta.url);
+const sectorOutput = new URL("../out/games/sector-drop.html", import.meta.url);
+const courierOutput = new URL("../out/games/star-courier.html", import.meta.url);
+const paddleOutput = new URL("../out/games/pulse-paddle.html", import.meta.url);
+const circuitOutput = new URL("../out/games/circuit-eater.html", import.meta.url);
+const coilOutput = new URL("../out/games/coilfield.html", import.meta.url);
 
 test("exports the original Break the App game on its permanent route", async () => {
   const html = await readFile(breakOutput, "utf8");
@@ -40,7 +45,13 @@ test("exports the Fairbyte Arcade catalog", async () => {
   assert.match(html, /\/games\/sixty-second-ceo/i);
   assert.match(html, /\/games\/signal-lost/i);
   assert.match(html, /\/games\/room-404/i);
-  assert.match(html, /06.*PLAYABLE GAMES/is);
+  assert.match(html, /11.*PLAYABLE GAMES/is);
+  assert.match(html, /Classics, rebuilt our way/i);
+  assert.match(html, /games\/sector-drop/i);
+  assert.match(html, /games\/star-courier/i);
+  assert.match(html, /games\/pulse-paddle/i);
+  assert.match(html, /games\/circuit-eater/i);
+  assert.match(html, /games\/coilfield/i);
 });
 
 test("serves the arcade catalog at the root domain", async () => {
@@ -84,4 +95,16 @@ test("exports Room 404 as a complete desktop escape game", async () => {
   assert.match(html, /RESTORE GUEST SESSION/i);
   assert.match(html, /abandoned computer/i);
   assert.match(html, /room-404-cover\.jpg/i);
+});
+
+test("exports five playable re-coded classic routes", async () => {
+  const pages = await Promise.all([sectorOutput,courierOutput,paddleOutput,circuitOutput,coilOutput].map(file=>readFile(file,"utf8")));
+  const checks = [
+    [/Sector Drop/i,/BEGIN DROP/i,/FAMILIAR RULES/i],
+    [/Star Courier/i,/START DELIVERY/i,/PARCELS/i],
+    [/Pulse Paddle/i,/SERVE PULSE/i,/first to 7/i],
+    [/Circuit Eater/i,/ENTER CIRCUIT/i,/security drones/i],
+    [/Coilfield/i,/CHARGE COIL/i,/EDGES CONNECT/i],
+  ];
+  pages.forEach((html,index)=>checks[index].forEach(pattern=>assert.match(html,pattern)));
 });
