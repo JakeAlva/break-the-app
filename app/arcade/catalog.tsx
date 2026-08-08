@@ -23,7 +23,7 @@ export default function ArcadeCatalog(){
   return <main className={styles.arcade}>
     <header className={styles.topbar}><Link href="/" className={styles.brand}><span className={styles.brandMark}><i/><i/><i/></span><div><b>FAIRBYTE</b><span>ARCADE</span></div></Link><nav><a href="#new">New releases</a><a href="#catalog">All games</a><a href="#project">100 Game Project</a></nav><a className={styles.studioLink} href="https://fairbyte.us/">FAIRBYTE.US ↗</a></header>
     <section className={styles.hero}>
-      <Image src="/arcade/2-17-am-cover.jpg" alt="A nighttime emergency dispatch center" fill priority sizes="100vw" className={styles.heroArt}/><div className={styles.heroShade}/>
+      <Image src="/arcade/2-17-am-cover.jpg" alt="A nighttime emergency dispatch center" fill loading="eager" sizes="100vw" className={styles.heroArt}/><div className={styles.heroShade}/>
       <div className={styles.heroCopy}><span><i/> EDITOR&apos;S SPOTLIGHT · GAME 002</span><h1><em>2:17</em> AM</h1><p>Four response units. Eight minutes. A city that refuses to wait its turn.</p><div className={styles.heroTags}><span>STRATEGY</span><span>8–15 MIN</span><span>TOUCH + MOUSE</span></div><div className={styles.heroActions}><Link href="/games/2-17-am/">▶ PLAY NOW</Link><a href="#catalog">BROWSE CATALOG</a></div></div>
       <aside className={styles.heroPanel}><span>FAIRBYTE ORIGINALS</span><b>06</b><small>PLAYABLE GAMES</small><div><i style={{width:"6%"}}/></div><p>Six releases on the road to one hundred. Every game runs instantly in your browser.</p></aside>
     </section>
