@@ -59,7 +59,7 @@ export default function CeoGame() {
   }
 
   return <main className={styles.game}>
-    <header className={styles.topbar}><Link href="/arcade/">F / ARCADE</Link><div className={styles.clock}><span>BOARD CALL IN</span><b>00:{String(seconds).padStart(2,"0")}</b></div><button onClick={audio.toggle}>{audio.enabled ? "◖))" : "MUTED"}</button></header>
+    <header className={styles.topbar}><Link href="/arcade/">F / ARCADE</Link><div className={styles.clock}><span>BOARD CALL IN</span><b>{seconds === 60 ? "01:00" : `00:${String(seconds).padStart(2,"0")}`}</b></div><button onClick={audio.toggle}>{audio.enabled ? "◖))" : "MUTED"}</button></header>
     <section className={styles.dashboard}>
       <aside className={styles.metrics}><h2>LIVE COMPANY</h2>{Object.entries(metrics).map(([key,value])=><div className={styles.metric} key={key}><span>{key.toUpperCase()}</span><b>{value}</b><i><u style={{width:`${value}%`}}/></i></div>)}<div className={styles.liveValuation}><span>EST. VALUE</span><b>${(valuation/1000000).toFixed(1)}M</b></div></aside>
       <section className={styles.decision}><div className={styles.memoTop}><span>{decision.from}</span><b>DECISION {index + 1} / {DECISIONS.length}</b></div><div className={styles.icon}>{decision.icon}</div><h1>{decision.headline}</h1><p>{decision.context}</p><div className={styles.choices}><button onClick={()=>choose(decision.left)}><span>A</span><h3>{decision.left.label}</h3><p>{decision.left.detail}</p><b>CHOOSE →</b></button><button onClick={()=>choose(decision.right)}><span>B</span><h3>{decision.right.label}</h3><p>{decision.right.detail}</p><b>CHOOSE →</b></button></div></section>
