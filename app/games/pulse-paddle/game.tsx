@@ -6,18 +6,59 @@ import classic from "../classics/classic.module.css";
 import {useGameAudio} from "../../useGameAudio";
 
 type Phase="ready"|"playing"|"won"|"lost";
-type World={player:number;cpu:number;bx:number;by:number;vx:number;vy:number;trail:{x:number;y:number}[]};
-const fresh=():World=>({player:210,cpu:210,bx:400,by:250,vx:-5.4,vy:3.2,trail:[]});
+type World={player:number;cpu:number;bx:number;by:number;vx:number;vy:number;trail:{x:number;y:number}[];trailClock:number};
+const fresh=():World=>({player:210,cpu:210,bx:400,by:250,vx:-5.4,vy:3.2,trail:[],trailClock:0});
 
 export default function PulsePaddle(){
-  const audio=useGameAudio();const canvas=useRef<HTMLCanvasElement>(null);const world=useRef<World>(fresh());const input=useRef({up:false,down:false});const [phase,setPhase]=useState<Phase>("ready");const phaseRef=useRef<Phase>("ready");const [score,setScore]=useState([0,0]);const scores=useRef([0,0]);const [best,setBest]=useState(0);
-  const setGamePhase=(p:Phase)=>{phaseRef.current=p;setPhase(p)};
+  const audio=useGameAudio();
+  const canvas=useRef<HTMLCanvasElement>(null);
+  const world=useRef<World>(fresh());
+  const input=useRef({up:false,down:false});
+  const [phase,setPhase]=useState<Phase>("ready");
+  const phaseRef=useRef<Phase>("ready");
+  const [score,setScore]=useState([0,0]);
+  const scores=useRef([0,0]);
+  const [best,setBest]=useState(0);
+
+  const setGamePhase=(next:Phase)=>{phaseRef.current=next;setPhase(next)};
   useEffect(()=>{const timer=window.setTimeout(()=>{try{setBest(Number(localStorage.getItem("fairbyte:pulse-paddle:best")||0))}catch{}},0);return()=>window.clearTimeout(timer)},[]);
   const serve=useCallback((toward:number)=>{world.current={...fresh(),vx:5.2*toward,vy:(Math.random()*.9-.45)*7}},[]);
-  const restart=useCallback(()=>{audio.play("navigate");scores.current=[0,0];setScore([0,0]);serve(Math.random()>.5?1:-1);setGamePhase("playing")},[audio,serve]);
-  useEffect(()=>{const down=(e:KeyboardEvent)=>{if(["ArrowUp","ArrowDown","w","s"," "].includes(e.key))e.preventDefault();if(e.key==="ArrowUp"||e.key.toLowerCase()==="w")input.current.up=true;if(e.key==="ArrowDown"||e.key.toLowerCase()==="s")input.current.down=true;if((e.key===" "||e.key==="Enter")&&phaseRef.current!=="playing")restart()};const up=(e:KeyboardEvent)=>{if(e.key==="ArrowUp"||e.key.toLowerCase()==="w")input.current.up=false;if(e.key==="ArrowDown"||e.key.toLowerCase()==="s")input.current.down=false};window.addEventListener("keydown",down);window.addEventListener("keyup",up);return()=>{window.removeEventListener("keydown",down);window.removeEventListener("keyup",up)}},[restart]);
-  useEffect(()=>{let frame=0;const ctx=canvas.current?.getContext("2d");if(!ctx)return;const draw=()=>{const w=world.current;if(phaseRef.current==="playing"){if(input.current.up)w.player-=7;if(input.current.down)w.player+=7;w.player=Math.max(18,Math.min(402,w.player));const target=w.by-40;w.cpu+=Math.sign(target-w.cpu)*Math.min(4.25,Math.abs(target-w.cpu));w.cpu=Math.max(18,Math.min(402,w.cpu));w.trail.unshift({x:w.bx,y:w.by});w.trail=w.trail.slice(0,13);w.bx+=w.vx;w.by+=w.vy;if(w.by<13||w.by>487){w.vy*=-1;w.by=Math.max(13,Math.min(487,w.by));audio.play("tap")}const left=w.bx<48&&w.bx>28&&w.by>w.player&&w.by<w.player+80;const right=w.bx>752&&w.bx<772&&w.by>w.cpu&&w.by<w.cpu+80;if((left&&w.vx<0)||(right&&w.vx>0)){const paddle=left?w.player:w.cpu;w.vx*=-1.055;w.vy+=(w.by-(paddle+40))*.07;w.bx=left?49:751;audio.play("navigate")}if(w.bx<-20||w.bx>820){const playerPoint=w.bx>820;const next:[number,number]=[scores.current[0]+(playerPoint?1:0),scores.current[1]+(playerPoint?0:1)];scores.current=next;setScore(next);audio.play(playerPoint?"success":"error");if(next[0]>=7||next[1]>=7){const won=next[0]>=7;setGamePhase(won?"won":"lost");if(won)setBest(old=>{const value=old+1;try{localStorage.setItem("fairbyte:pulse-paddle:best",String(value))}catch{}return value})}else serve(playerPoint?-1:1)}}ctx.fillStyle="#05070c";ctx.fillRect(0,0,800,500);ctx.strokeStyle="#182333";ctx.lineWidth=1;for(let x=0;x<=800;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,500);ctx.stroke()}for(let y=0;y<=500;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(800,y);ctx.stroke()}ctx.setLineDash([8,12]);ctx.strokeStyle="#506070";ctx.beginPath();ctx.moveTo(400,0);ctx.lineTo(400,500);ctx.stroke();ctx.setLineDash([]);const g=ctx.createRadialGradient(400,250,10,400,250,290);g.addColorStop(0,"#61e5ff0c");g.addColorStop(1,"transparent");ctx.fillStyle=g;ctx.fillRect(0,0,800,500);ctx.fillStyle="#61e5ff";ctx.shadowColor="#61e5ff";ctx.shadowBlur=18;ctx.fillRect(26,w.player,14,80);ctx.fillStyle="#ff4f9a";ctx.shadowColor="#ff4f9a";ctx.fillRect(760,w.cpu,14,80);w.trail.forEach((p,i)=>{ctx.globalAlpha=(13-i)/35;ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(p.x,p.y,11-i*.5,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;ctx.fillStyle="#fff";ctx.shadowColor="#fff";ctx.shadowBlur=22;ctx.beginPath();ctx.arc(w.bx,w.by,10,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.font="900 54px Arial";ctx.textAlign="center";ctx.fillStyle="#61e5ff66";ctx.fillText(String(scores.current[0]),330,72);ctx.fillStyle="#ff4f9a66";ctx.fillText(String(scores.current[1]),470,72);frame=requestAnimationFrame(draw)};frame=requestAnimationFrame(draw);return()=>cancelAnimationFrame(frame)},[audio,serve]);
-  const pressUp=useCallback(()=>{input.current.up=true},[]);const pressDown=useCallback(()=>{input.current.down=true},[]);const release=useCallback(()=>{input.current.up=false;input.current.down=false},[]);const controls=<><button onPointerDown={pressUp} onPointerUp={release} onPointerLeave={release} aria-label="Paddle up">↑</button><button onPointerDown={pressDown} onPointerUp={release} onPointerLeave={release} aria-label="Paddle down">↓</button></>;
+  const restart=useCallback(()=>{audio.play("navigate");input.current={up:false,down:false};scores.current=[0,0];setScore([0,0]);serve(Math.random()>.5?1:-1);setGamePhase("playing")},[audio,serve]);
+
+  useEffect(()=>{const down=(event:KeyboardEvent)=>{if(["ArrowUp","ArrowDown","w","s"," "].includes(event.key))event.preventDefault();if(event.key==="ArrowUp"||event.key.toLowerCase()==="w")input.current.up=true;if(event.key==="ArrowDown"||event.key.toLowerCase()==="s")input.current.down=true;if((event.key===" "||event.key==="Enter")&&phaseRef.current!=="playing")restart()};const up=(event:KeyboardEvent)=>{if(event.key==="ArrowUp"||event.key.toLowerCase()==="w")input.current.up=false;if(event.key==="ArrowDown"||event.key.toLowerCase()==="s")input.current.down=false};window.addEventListener("keydown",down);window.addEventListener("keyup",up);return()=>{window.removeEventListener("keydown",down);window.removeEventListener("keyup",up)}},[restart]);
+
+  useEffect(()=>{
+    let frame=0,last=performance.now();
+    const ctx=canvas.current?.getContext("2d");if(!ctx)return;
+    const point=(playerPoint:boolean)=>{const next:[number,number]=[scores.current[0]+(playerPoint?1:0),scores.current[1]+(playerPoint?0:1)];scores.current=next;setScore(next);audio.play(playerPoint?"success":"error");if(next[0]>=7||next[1]>=7){const won=next[0]>=7;setGamePhase(won?"won":"lost");if(won)setBest(old=>{const value=old+1;try{localStorage.setItem("fairbyte:pulse-paddle:best",String(value))}catch{}return value})}else serve(playerPoint?-1:1)};
+    const draw=(now:number)=>{
+      const dt=Math.min(1.45,(now-last)/16.67);last=now;
+      const w=world.current;
+      if(phaseRef.current==="playing"){
+        if(input.current.up)w.player-=7*dt;if(input.current.down)w.player+=7*dt;w.player=Math.max(18,Math.min(402,w.player));
+        const target=w.by-40;w.cpu+=Math.sign(target-w.cpu)*Math.min(3.75*dt,Math.abs(target-w.cpu));w.cpu=Math.max(18,Math.min(402,w.cpu));
+        w.trailClock+=dt;if(w.trailClock>=1){w.trailClock%=1;w.trail.unshift({x:w.bx,y:w.by});w.trail=w.trail.slice(0,13)}
+        w.bx+=w.vx*dt;w.by+=w.vy*dt;
+        if(w.by<13||w.by>487){w.vy*=-1;w.by=Math.max(13,Math.min(487,w.by));audio.play("tap")}
+        const left=w.bx<48&&w.bx>28&&w.by>w.player&&w.by<w.player+80;
+        const right=w.bx>752&&w.bx<772&&w.by>w.cpu&&w.by<w.cpu+80;
+        if((left&&w.vx<0)||(right&&w.vx>0)){const paddle=left?w.player:w.cpu;w.vx=Math.max(-12,Math.min(12,w.vx*-1.055));w.vy=Math.max(-10,Math.min(10,w.vy+(w.by-(paddle+40))*.07));w.bx=left?49:751;audio.play("navigate")}
+        if(w.bx<-20||w.bx>820)point(w.bx>820);
+      }
+      ctx.fillStyle="#05070c";ctx.fillRect(0,0,800,500);ctx.strokeStyle="#182333";ctx.lineWidth=1;
+      for(let x=0;x<=800;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,500);ctx.stroke()}for(let y=0;y<=500;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(800,y);ctx.stroke()}
+      ctx.setLineDash([8,12]);ctx.strokeStyle="#506070";ctx.beginPath();ctx.moveTo(400,0);ctx.lineTo(400,500);ctx.stroke();ctx.setLineDash([]);
+      const glow=ctx.createRadialGradient(400,250,10,400,250,290);glow.addColorStop(0,"#61e5ff0c");glow.addColorStop(1,"transparent");ctx.fillStyle=glow;ctx.fillRect(0,0,800,500);
+      ctx.fillStyle="#61e5ff";ctx.shadowColor="#61e5ff";ctx.shadowBlur=18;ctx.fillRect(26,w.player,14,80);ctx.fillStyle="#ff4f9a";ctx.shadowColor="#ff4f9a";ctx.fillRect(760,w.cpu,14,80);
+      w.trail.forEach((trailPoint,index)=>{ctx.globalAlpha=(13-index)/35;ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(trailPoint.x,trailPoint.y,11-index*.5,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;
+      ctx.fillStyle="#fff";ctx.shadowColor="#fff";ctx.shadowBlur=22;ctx.beginPath();ctx.arc(w.bx,w.by,10,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.font="900 54px Arial";ctx.textAlign="center";ctx.fillStyle="#61e5ff66";ctx.fillText(String(scores.current[0]),330,72);ctx.fillStyle="#ff4f9a66";ctx.fillText(String(scores.current[1]),470,72);
+      frame=requestAnimationFrame(draw);
+    };
+    frame=requestAnimationFrame(draw);return()=>cancelAnimationFrame(frame)
+  },[audio,serve]);
+
+  const pressUp=useCallback(()=>{input.current.up=true},[]);const pressDown=useCallback(()=>{input.current.down=true},[]);const releaseUp=useCallback(()=>{input.current.up=false},[]);const releaseDown=useCallback(()=>{input.current.down=false},[]);
+  const controls=<><button onPointerDown={pressUp} onPointerUp={releaseUp} onPointerLeave={releaseUp} onPointerCancel={releaseUp} aria-label="Paddle up">↑</button><button onPointerDown={pressDown} onPointerUp={releaseDown} onPointerLeave={releaseDown} onPointerCancel={releaseDown} aria-label="Paddle down">↓</button></>;
   return <ClassicFrame number="009" title="Pulse Paddle" subtitle="The station defense system has challenged you to first pulse." accent="#61e5ff" score={`${score[0]}–${score[1]}`} best={`${best} WINS`} status="first to 7 · deflection speed increases" sound={audio.enabled} onSound={audio.toggle} onRestart={restart} objective="Deflect the white pulse past the magenta defense paddle. First side to seven wins." instructions={["Move with W/S or ↑/↓.","Hit away from center to change the return angle.","Each successful deflection makes the pulse faster."]} controls={controls}>
     <div className={classic.boardWrap}><canvas ref={canvas} width={800} height={500} className={classic.canvas} aria-label="Pulse Paddle game arena"/><span className={classic.hint}>YOU · CYAN / DEFENSE · MAGENTA</span>{phase!=="playing"&&<div className={classic.overlay}><div><span>{phase==="won"?"SYSTEM DEFEATED":phase==="lost"?"SIGNAL MISSED":"STATION CHANNEL 09"}</span><h2>{phase==="won"?"Clean return.":phase==="lost"?"Defense held.":"Send it back."}</h2><p>One paddle. One volatile pulse. First to seven controls the channel.</p><button onClick={restart}>{phase==="ready"?"SERVE PULSE":"PLAY AGAIN"}</button></div></div>}</div>
   </ClassicFrame>;

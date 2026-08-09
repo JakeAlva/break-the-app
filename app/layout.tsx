@@ -8,17 +8,17 @@ export const metadata: Metadata = {
     "A growing catalog of original browser games and re-coded arcade classics. No downloads and no accounts.",
   openGraph: {
     title: "Fairbyte Arcade",
-    description: "Eleven browser games. No downloads. Pick a world and play.",
+    description: "Eighteen browser games. No downloads. Pick a world and play.",
     type: "website",
     url: "/",
     siteName: "Fairbyte Arcade",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Break the App by Fairbyte Labs" }],
+    images: [{ url: "/arcade/fairbyte-arcade-18.png", width: 1200, height: 630, alt: "Fairbyte Arcade — 18 games, play instantly" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Fairbyte Arcade",
     description: "Original games and re-coded classics, instantly playable.",
-    images: ["/og.png"],
+    images: ["/arcade/fairbyte-arcade-18.png"],
   },
 };
 

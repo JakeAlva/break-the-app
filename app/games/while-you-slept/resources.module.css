@@ -1,0 +1,35 @@
+.resources {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+.resources span {
+  background: #33493b;
+  color: #e9dfbd;
+  padding: 8px 10px;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.resources b {
+  display: block;
+  color: #f2d16e;
+  font: 18px Georgia, serif;
+  letter-spacing: 0;
+}
+
+@media (max-width: 760px) {
+  .resources {
+    margin-bottom: 14px;
+  }
+
+  .resources ~ div button[aria-label^="Add worker"],
+  .resources ~ div button[aria-label^="Remove worker"] {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+  }
+}

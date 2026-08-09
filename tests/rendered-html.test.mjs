@@ -72,10 +72,25 @@ test("exports all seven depth-drop games with real play systems", async () => {
     [/Lumenhold/i,/twelve escalating waves/i,/LIGHT THE BEACONS/i],
     [/Twofold Arena/i,/LOCAL 2P/i,/ENTER ARENA/i],
     [/Ash &amp; Ink|Ash & Ink/i,/nine encounters/i,/OPEN THE TOME/i],
-    [/Faultline Pinball/i,/quake-powered multiball/i,/LAUNCH BALL/i],
+    [/Faultline Pinball/i,/charged plunger/i,/HOLD \+ RELEASE/i,/START TABLE/i],
     [/While You Slept/i,/production continues/i,/Build the town/i],
   ];
   pages.forEach((html,index)=>checks[index].forEach(pattern=>assert.match(html,pattern)));
+});
+
+test("ships the QA fixes in the rendered games", async () => {
+  const [daily,,lumen,arena,ash,pinball,kingdom]=await Promise.all(depthOutputs.map(file=>readFile(file,"utf8")));
+  const courier=await readFile(courierOutput,"utf8");
+  assert.doesNotMatch(daily,/DAILY #-\d+/i);
+  assert.match(courier,/checkpoints activate/i);
+  assert.match(ash,/blight/i);
+  assert.match(lumen,/splitters/i);
+  assert.match(arena,/SOLO WINS/i);
+  assert.match(pinball,/THIRD = TILT/i);
+  assert.match(kingdom,/FOOD/i);
+  assert.match(kingdom,/WOOD/i);
+  assert.match(kingdom,/GOLD/i);
+  assert.match(kingdom,/LORE/i);
 });
 
 test("exports the complete 2:17 AM game route", async () => {
