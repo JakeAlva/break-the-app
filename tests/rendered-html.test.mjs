@@ -72,7 +72,7 @@ test("exports all seven depth-drop games with real play systems", async () => {
     [/Lumenhold/i,/twelve escalating waves/i,/LIGHT THE BEACONS/i],
     [/Twofold Arena/i,/LOCAL 2P/i,/ENTER ARENA/i],
     [/Ash &amp; Ink|Ash & Ink/i,/nine encounters/i,/OPEN THE TOME/i],
-    [/Faultline Pinball/i,/charged plunger/i,/HOLD \+ RELEASE/i,/START TABLE/i],
+    [/Faultline Pinball/i,/charged plunger/i,/TAP TO LAUNCH/i,/open gate above station 3/i,/START TABLE/i],
     [/While You Slept/i,/production continues/i,/Build the town/i],
   ];
   pages.forEach((html,index)=>checks[index].forEach(pattern=>assert.match(html,pattern)));
